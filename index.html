@@ -1,349 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
- <meta charset="UTF-8" />
-
- <title>Virtual Million Tile Video Wall</title>
-
- <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
- <style>
-
-html, body {
-
-margin: 0;
-
-height: 100%;
-
-overflow: hidden;
-
-background: #000;
-
-font-family: sans-serif;
-
-color: white;
-
-}
-
-
-
-#viewport {
-
-width: 100vw;
-
-height: 100vh;
-
-overflow: auto;
-
-position: relative;
-
-}
-
-
-
-#grid {
-
-position: relative;
-
-width: 100000px; /* 1000 x 100px tile */
-
-height: 56250px; /* 1000 x 56.25px tile (16:9 ratio) */
-
-}
-
-
-
-.tile {
-
-position: absolute;
-
-width: 100px;
-
-height: 56.25px;
-
-background: #222;
-
-overflow: hidden;
-
-cursor: pointer;
-
-}
-
-
-
-.tile img {
-
-width: 100%;
-
-height: 100%;
-
-object-fit: cover;
-
-}
-
-
-
-.iframe-container {
-
-width: 100%;
-
-height: 100%;
-
-}
-
-
-
-.iframe-container iframe {
-
-width: 100%;
-
-height: 100%;
-
-border: none;
-
-}
-
-
-
-.tile-number {
-
-position: absolute;
-
-top: 0;
-
-left: 0;
-
-width: 100%;
-
-height: 20px;
-
-background: rgba(0, 0, 0, 0.7);
-
-color: white;
-
-text-align: center;
-
-line-height: 20px;
-
-font-size: 12px;
-
-opacity: 0;
-
-transition: opacity 0.3s ease;
-
-}
-
-
-
-.tile:hover .tile-number {
-
-opacity: 1;
-
-}
-
- </style>
-
+  <meta charset="UTF-8" />
+  <title>Virtual Million Tile Video Wall</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: sans-serif;
+      color: white;
+    }
+
+    #viewport {
+      width: 100vw;
+      height: 100vh;
+      overflow: auto;
+      position: relative;
+    }
+
+    #grid {
+      position: relative;
+      width: 320000px; /* 1000 x 320px */
+      height: 180000px; /* 1000 x 180px */
+    }
+
+    .tile {
+      position: absolute;
+      width: 320px;
+      height: 180px;
+      background: #222;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .iframe-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .iframe-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .tile-number {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      text-align: center;
+      line-height: 20px;
+      font-size: 12px;
+      opacity: 1; /* Always visible */
+      transition: opacity 0.3s ease;
+    }
+  </style>
 </head>
 
 <body>
-
- <div id="viewport">
-
-<div id="grid"></div>
-
- </div>
-
-
-
- <script>
-
-const viewport = document.getElementById('viewport');
-
-const grid = document.getElementById('grid');
-
-
-
-const TILE_WIDTH = 100;
-
-const TILE_HEIGHT = 56.25;
-
-const GRID_COLS = 1000;
-
-const GRID_ROWS = 1000;
-
-const TILE_COUNT = GRID_COLS * GRID_ROWS;
-
-
-
-// Use a few sample YouTube video IDs for variety
-
-const sampleVideos = [
-
-"J3i3F2e4IYs",
-"N_ZmHYF6-xM",
-"cESaIUWoCJQ",
-"5R6bBNnZgDE",
-"1gFSDD12RP8",
-"KE4YfuV-Nxw",
-"k48e9GzcQVM",
-"twQCZWBbcRE",
-"twQCZWBbcRE",
-"NteGUDYZ1nE",
-"FW9Sqxb-4o"
-];
-
-
-
-
-
-const visibleTiles = {};
-
-
-
-function renderTiles() {
-
-const scrollLeft = viewport.scrollLeft;
-
-const scrollTop = viewport.scrollTop;
-
-const viewportWidth = viewport.clientWidth;
-
-const viewportHeight = viewport.clientHeight;
-
-
-
-const startCol = Math.floor(scrollLeft / TILE_WIDTH);
-
-const endCol = Math.min(GRID_COLS, Math.ceil((scrollLeft + viewportWidth) / TILE_WIDTH));
-
-const startRow = Math.floor(scrollTop / TILE_HEIGHT);
-
-const endRow = Math.min(GRID_ROWS, Math.ceil((scrollTop + viewportHeight) / TILE_HEIGHT));
-
-
-
-const newVisible = {};
-
-
-
-for (let row = startRow; row < endRow; row++) {
-
-for (let col = startCol; col < endCol; col++) {
-
-const key = `${row}_${col}`;
-
-newVisible[key] = true;
-
-if (!visibleTiles[key]) {
-
-const youtubeId = sampleVideos[(row * GRID_COLS + col) % sampleVideos.length];
-
-const tile = document.createElement("div");
-
-tile.className = "tile";
-
-tile.style.top = `${row * TILE_HEIGHT}px`;
-
-tile.style.left = `${col * TILE_WIDTH}px`;
-
-
-
-const img = document.createElement("img");
-
-img.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
-
-img.alt = `Tile ${row}, ${col}`;
-
-tile.appendChild(img);
-
-
-
-// Add tile number for ALL tiles
-
-const tileNumber = document.createElement("div");
-
-tileNumber.className = "tile-number";
-
-// Calculate the unique number for each tile (0 to 999,999)
-
-tileNumber.textContent = (row * GRID_COLS + col) + 1; // Add 1 to start numbering from 1
-
-tile.appendChild(tileNumber);
-
-
-
-
-
-tile.addEventListener("click", () => {
-
-tile.innerHTML = `
-
-<div class="iframe-container">
-
-<iframe
-
-src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1"
-
-allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-
-allowfullscreen
-
-></iframe>
-
-</div>`;
-
-});
-
-
-
-grid.appendChild(tile);
-
-visibleTiles[key] = tile;
-
-}
-
-}
-
-}
-
-
-
-// Remove tiles that are no longer visible
-
-for (let key in visibleTiles) {
-
-if (!newVisible[key]) {
-
-grid.removeChild(visibleTiles[key]);
-
-delete visibleTiles[key];
-
-}
-
-}
-
-}
-
-
-
-// Initial render
-
-renderTiles();
-
-
-
-// Listen for scroll
-
-viewport.addEventListener("scroll", () => {
-
-requestAnimationFrame(renderTiles);
-
-});
-
- </script>
-
+  <div id="viewport">
+    <div id="grid"></div>
+  </div>
+
+  <script>
+    const viewport = document.getElementById('viewport');
+    const grid = document.getElementById('grid');
+
+    const TILE_WIDTH = 320;
+    const TILE_HEIGHT = 180;
+    const GRID_COLS = 1000;
+    const GRID_ROWS = 1000;
+
+    const sampleVideos = [
+      "J3i3F2e4IYs",
+      "N_ZmHYF6-xM",
+      "cESaIUWoCJQ",
+      "5R6bBNnZgDE",
+      "1gFSDD12RP8",
+      "KE4YfuV-Nxw",
+      "k48e9GzcQVM",
+      "twQCZWBbcRE",
+      "NteGUDYZ1nE",
+      "FW9Sqxb-4o"
+    ];
+
+    const visibleTiles = {};
+
+    function renderTiles() {
+      const scrollLeft = viewport.scrollLeft;
+      const scrollTop = viewport.scrollTop;
+      const viewportWidth = viewport.clientWidth;
+      const viewportHeight = viewport.clientHeight;
+
+      const startCol = Math.floor(scrollLeft / TILE_WIDTH);
+      const endCol = Math.min(GRID_COLS, Math.ceil((scrollLeft + viewportWidth) / TILE_WIDTH));
+      const startRow = Math.floor(scrollTop / TILE_HEIGHT);
+      const endRow = Math.min(GRID_ROWS, Math.ceil((scrollTop + viewportHeight) / TILE_HEIGHT));
+
+      const newVisible = {};
+
+      for (let row = startRow; row < endRow; row++) {
+        for (let col = startCol; col < endCol; col++) {
+          const key = `${row}_${col}`;
+          newVisible[key] = true;
+          if (!visibleTiles[key]) {
+            const youtubeId = sampleVideos[(row * GRID_COLS + col) % sampleVideos.length];
+
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.style.top = `${row * TILE_HEIGHT}px`;
+            tile.style.left = `${col * TILE_WIDTH}px`;
+
+            const img = document.createElement("img");
+            img.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+            img.alt = `Tile ${row}, ${col}`;
+            tile.appendChild(img);
+
+            const tileNumber = document.createElement("div");
+            tileNumber.className = "tile-number";
+            tileNumber.textContent = (row * GRID_COLS + col) + 1;
+            tile.appendChild(tileNumber);
+
+            tile.addEventListener("click", () => {
+              tile.innerHTML = `
+                <div class="iframe-container">
+                  <iframe
+                    src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                  ></iframe>
+                </div>`;
+            });
+
+            grid.appendChild(tile);
+            visibleTiles[key] = tile;
+          }
+        }
+      }
+
+      for (let key in visibleTiles) {
+        if (!newVisible[key]) {
+          grid.removeChild(visibleTiles[key]);
+          delete visibleTiles[key];
+        }
+      }
+    }
+
+    renderTiles();
+    viewport.addEventListener("scroll", () => {
+      requestAnimationFrame(renderTiles);
+    });
+  </script>
 </body>
-
 </html>
