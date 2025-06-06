@@ -23,14 +23,14 @@
 
     #grid {
       position: relative;
-      width: 320000px; /* 1000 x 320px */
-      height: 180000px; /* 1000 x 180px */
+      width: 160000px; /* 1000 x 160px */
+      height: 90000px;  /* 1000 x 90px */
     }
 
     .tile {
       position: absolute;
-      width: 320px;
-      height: 180px;
+      width: 160px;
+      height: 90px;
       background: #222;
       overflow: hidden;
       cursor: pointer;
@@ -68,6 +68,10 @@
       opacity: 1; /* Always visible */
       transition: opacity 0.3s ease;
     }
+
+    .tile:hover .tile-number {
+      opacity: 1;
+    }
   </style>
 </head>
 
@@ -80,8 +84,8 @@
     const viewport = document.getElementById('viewport');
     const grid = document.getElementById('grid');
 
-    const TILE_WIDTH = 320;
-    const TILE_HEIGHT = 180;
+    const TILE_WIDTH = 160;
+    const TILE_HEIGHT = 90;
     const GRID_COLS = 1000;
     const GRID_ROWS = 1000;
 
@@ -95,7 +99,11 @@
       "k48e9GzcQVM",
       "twQCZWBbcRE",
       "NteGUDYZ1nE",
-      "FW9Sqxb-4o"
+      "FW9Sqxb-4o",
+      "hr8ZQ-Qybg8",
+      "Au3H5cYTUI8",
+      "xXp4iNBFL88",
+      "COvy3uC7t_E"
     ];
 
     const visibleTiles = {};
