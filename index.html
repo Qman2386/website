@@ -143,7 +143,7 @@
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
   const playAllButton = document.getElementById('playAllButton');
-  const toggleNumbersButton = document.getElementById('toggleNumbersButton'); // Get the new button
+  const toggleNumbersButton = document.getElementById('toggleNumbersButton');
 
   const TILE_WIDTH = 160;
   const TILE_HEIGHT = 90;
@@ -164,117 +164,210 @@
   ];
 
   let tileNumbersVisible = true; // Track visibility state
+  const visibleTiles = {}; // Stores references to currently DOM-rendered tiles
+  const pendingPlaybacks = new Map(); // Stores timeout IDs for videos waiting to play
 
-  const visibleTiles = {};
+  /**
+   * Helper function to play a video in a given tile.
+   * Replaces the thumbnail with the YouTube iframe.
+   * @param {HTMLElement} tile The tile element.
+   * @param {string} youtubeId The YouTube video ID.
+   * @param {boolean} autoplay Whether the video should autoplay.
+   */
+  function playVideoInTile(tile, youtubeId, autoplay = true) {
+    // If the tile is already playing a video, do nothing
+    if (tile.querySelector('iframe')) {
+      return;
+    }
 
-  function renderTiles() {
-  const scrollLeft = viewport.scrollLeft;
-  const scrollTop = viewport.scrollTop;
-  const viewportWidth = viewport.clientWidth;
-  const viewportHeight = viewport.clientHeight;
-
-  const startCol = Math.floor(scrollLeft / TILE_WIDTH);
-  const endCol = Math.min(GRID_COLS, Math.ceil((scrollLeft + viewportWidth) / TILE_WIDTH));
-  const startRow = Math.floor(scrollTop / TILE_HEIGHT);
-  const endRow = Math.min(GRID_ROWS, Math.ceil((scrollTop + viewportHeight) / TILE_HEIGHT));
-
-  const newVisible = {};
-
-  for (let row = startRow; row < endRow; row++) {
-  for (let col = startCol; col < endCol; col++) {
-  const key = `${row}_${col}`;
-  newVisible[key] = true;
-  if (!visibleTiles[key]) {
-  const youtubeId = sampleVideos[(row * GRID_COLS + col) % sampleVideos.length];
-
-  const tile = document.createElement("div");
-  tile.className = "tile";
-  tile.style.top = `${row * TILE_HEIGHT}px`;
-  tile.style.left = `${col * TILE_WIDTH}px`;
-
-  const img = document.createElement("img");
-  img.src = `http://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`; // Corrected YouTube thumbnail URL
-  img.alt = `Tile ${row}, ${col}`;
-  tile.appendChild(img);
-
-  const tileNumber = document.createElement("div");
-  tileNumber.className = "tile-number";
-  tileNumber.textContent = (row * GRID_COLS + col) + 1;
-  if (!tileNumbersVisible) {
-  tileNumber.classList.add('hidden');
+    tile.innerHTML = `
+      <div class="iframe-container">
+        <iframe
+          src="https://www.youtube.com/embed/${youtubeId}?autoplay=${autoplay ? 1 : 0}&mute=1&playsinline=1&modestbranding=1"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>`;
+    // Optionally re-add tile number if it was present
+    const tileNumber = tile.querySelector('.tile-number');
+    if (tileNumber && !tileNumbersVisible) { // If numbers are hidden, hide it again after re-rendering
+      tileNumber.classList.add('hidden');
+    }
   }
-  tile.appendChild(tileNumber);
 
-  tile.addEventListener("click", () => {
-  tile.innerHTML = `
-  <div class="iframe-container">
-  <iframe
-  src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowfullscreen
-  ></iframe>
-  </div>`;
+  /**
+   * Helper function to reset a tile back to its thumbnail state.
+   * @param {HTMLElement} tile The tile element.
+   * @param {string} youtubeId The YouTube video ID.
+   * @param {number} tileIndex The index of the tile for number display.
+   */
+  function resetTileToThumbnail(tile, youtubeId, tileIndex) {
+    // Only reset if it's currently an iframe
+    if (tile.querySelector('iframe')) {
+      tile.innerHTML = ''; // Clear existing content
+
+      const img = document.createElement("img");
+      img.src = `http://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+      img.alt = `Tile ${tileIndex}`;
+      tile.appendChild(img);
+
+      const tileNumber = document.createElement("div");
+      tileNumber.className = "tile-number";
+      tileNumber.textContent = tileIndex + 1;
+      if (!tileNumbersVisible) {
+        tileNumber.classList.add('hidden');
+      }
+      tile.appendChild(tileNumber);
+
+      // Re-attach click listener for individual playback
+      tile.addEventListener("click", () => {
+        playVideoInTile(tile, youtubeId, true); // Autoplay on individual click
+      }, { once: true }); // Play once and then remove this specific listener
+    }
+  }
+
+  // Intersection Observer for delayed playback
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const tile = entry.target;
+      const key = tile.dataset.key; // Get the key stored on the tile element
+      const youtubeId = tile.dataset.youtubeId; // Get the youtubeId stored on the tile element
+      const tileIndex = parseInt(tile.dataset.tileIndex); // Get tile index
+
+      if (entry.isIntersecting) {
+        // Tile entered viewport
+        // If there's no pending playback for this tile, start a timer
+        if (!pendingPlaybacks.has(key)) {
+          const timeoutId = setTimeout(() => {
+            playVideoInTile(tile, youtubeId, true); // Auto-play after 5 seconds
+            pendingPlaybacks.delete(key); // Clear from map after playing
+          }, 5000); // 5-second delay
+          pendingPlaybacks.set(key, timeoutId);
+        }
+      } else {
+        // Tile left viewport
+        // Clear any pending playback timer
+        if (pendingPlaybacks.has(key)) {
+          clearTimeout(pendingPlaybacks.get(key));
+          pendingPlaybacks.delete(key);
+        }
+        // If it was playing, reset it to thumbnail
+        resetTileToThumbnail(tile, youtubeId, tileIndex);
+      }
+    });
+  }, {
+    root: viewport, // Observe within the viewport div
+    threshold: 0.8 // Trigger when at least 80% of the tile is visible
   });
 
-  grid.appendChild(tile);
-  visibleTiles[key] = tile;
-  }
-  }
-  }
+  function renderTiles() {
+    const scrollLeft = viewport.scrollLeft;
+    const scrollTop = viewport.scrollTop;
+    const viewportWidth = viewport.clientWidth;
+    const viewportHeight = viewport.clientHeight;
 
-  for (let key in visibleTiles) {
-  if (!newVisible[key]) {
-  grid.removeChild(visibleTiles[key]);
-  delete visibleTiles[key];
-  }
-  }
+    const startCol = Math.floor(scrollLeft / TILE_WIDTH);
+    const endCol = Math.min(GRID_COLS, Math.ceil((scrollLeft + viewportWidth) / TILE_WIDTH));
+    const startRow = Math.floor(scrollTop / TILE_HEIGHT);
+    const endRow = Math.min(GRID_ROWS, Math.ceil((scrollTop + viewportHeight) / TILE_HEIGHT));
+
+    const newVisibleKeys = {};
+
+    for (let row = startRow; row < endRow; row++) {
+      for (let col = startCol; col < endCol; col++) {
+        const key = `${row}_${col}`;
+        newVisibleKeys[key] = true;
+
+        if (!visibleTiles[key]) {
+          const tileIndex = (row * GRID_COLS + col);
+          const youtubeId = sampleVideos[tileIndex % sampleVideos.length];
+
+          const tile = document.createElement("div");
+          tile.className = "tile";
+          tile.style.top = `${row * TILE_HEIGHT}px`;
+          tile.style.left = `${col * TILE_WIDTH}px`;
+          tile.dataset.key = key; // Store key for observer
+          tile.dataset.youtubeId = youtubeId; // Store youtubeId for observer
+          tile.dataset.tileIndex = tileIndex; // Store tile index
+
+          const img = document.createElement("img");
+          img.src = `http://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+          img.alt = `Tile ${row}, ${col}`;
+          tile.appendChild(img);
+
+          const tileNumber = document.createElement("div");
+          tileNumber.className = "tile-number";
+          tileNumber.textContent = tileIndex + 1;
+          if (!tileNumbersVisible) {
+            tileNumber.classList.add('hidden');
+          }
+          tile.appendChild(tileNumber);
+
+          // Individual click to play immediately
+          tile.addEventListener("click", function handler() {
+            playVideoInTile(tile, youtubeId, true);
+            // Remove this specific listener after first click to prevent re-attaching
+            // It will be re-attached if the tile is reset to thumbnail
+            tile.removeEventListener("click", handler);
+          });
+
+          grid.appendChild(tile);
+          visibleTiles[key] = tile;
+          observer.observe(tile); // Start observing the new tile
+        }
+      }
+    }
+
+    for (let key in visibleTiles) {
+      if (!newVisibleKeys[key]) {
+        // Tile is no longer visible, remove from DOM and unobserve
+        observer.unobserve(visibleTiles[key]);
+        // Clear any pending playback timer for this tile
+        if (pendingPlaybacks.has(key)) {
+          clearTimeout(pendingPlaybacks.get(key));
+          pendingPlaybacks.delete(key);
+        }
+        grid.removeChild(visibleTiles[key]);
+        delete visibleTiles[key];
+      }
+    }
   }
 
   renderTiles();
 
-  // Play Visible Videos functionality
+  // Play Visible Videos functionality (bypasses 5-second delay)
   playAllButton.addEventListener('click', () => {
-  const tilesToPlay = [];
-  for (let key in visibleTiles) {
-  // Ensure the tile is actually in the current viewport and not already playing
-  const tileElement = visibleTiles[key];
-  const rect = tileElement.getBoundingClientRect();
-  const isCompletelyVisible = (
-  rect.top >= 0 &&
-  rect.left >= 0 &&
-  rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-  rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-  );
+    // Collect keys of currently visible tiles from the visibleTiles object
+    const currentVisibleKeys = Object.keys(visibleTiles);
 
-  if (isCompletelyVisible && !tileElement.querySelector('iframe')) {
-  tilesToPlay.push(tileElement);
-  }
-  }
+    currentVisibleKeys.forEach(key => {
+      const tileElement = visibleTiles[key];
+      const youtubeId = tileElement.dataset.youtubeId;
 
-  let delay = 0;
-  const staggerDelay = 200; // 200ms delay between each video start
+      // Clear any pending timeout for this tile as it will play immediately
+      if (pendingPlaybacks.has(key)) {
+        clearTimeout(pendingPlaybacks.get(key));
+        pendingPlaybacks.delete(key);
+      }
 
-  tilesToPlay.forEach(tile => {
-  setTimeout(() => {
-  tile.click(); // Simulate a click to play the video
-  }, delay);
-  delay += staggerDelay;
-  });
+      // Play the video immediately
+      playVideoInTile(tileElement, youtubeId, true);
+    });
   });
 
   // Toggle Numbers Functionality
   toggleNumbersButton.addEventListener('click', () => {
-  tileNumbersVisible = !tileNumbersVisible;
-  for (let key in visibleTiles) {
-  const tileNumber = visibleTiles[key].querySelector('.tile-number');
-  if (tileNumber) {
-  tileNumber.classList.toggle('hidden', !tileNumbersVisible);
-  }
-  }
+    tileNumbersVisible = !tileNumbersVisible;
+    for (let key in visibleTiles) {
+      const tileNumber = visibleTiles[key].querySelector('.tile-number');
+      if (tileNumber) {
+        tileNumber.classList.toggle('hidden', !tileNumbersVisible);
+      }
+    }
   });
 
   viewport.addEventListener("scroll", () => {
-  requestAnimationFrame(renderTiles);
+    requestAnimationFrame(renderTiles);
   });
  </script>
 </body>
