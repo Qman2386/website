@@ -26,7 +26,7 @@
   color: #000;
   text-decoration: none;
   font-weight: bold;
-  margin-right: 20px;
+  margin-right: 20px; /* Spacing between link and button */
  }
 
  #banner a:hover {
@@ -34,8 +34,8 @@
  }
 
  /* Button Styles */
- #playAllButton {
-  background-color: #4CAF50;
+ #playAllButton, #toggleNumbersButton {
+  background-color: #4CAF50; /* Green */
   border: none;
   color: white;
   padding: 8px 16px;
@@ -132,6 +132,7 @@
   Support the Million Tile Video Wall on Indiegogo!
   </a>
   <button id="playAllButton">Play Visible Videos</button>
+  <button id="toggleNumbersButton">Toggle Numbers</button>
  </div>
 
  <div id="viewport">
@@ -142,6 +143,7 @@
   const viewport = document.getElementById('viewport');
   const grid = document.getElementById('grid');
   const playAllButton = document.getElementById('playAllButton');
+  const toggleNumbersButton = document.getElementById('toggleNumbersButton'); // Get the new button
 
   const TILE_WIDTH = 160;
   const TILE_HEIGHT = 90;
@@ -160,6 +162,8 @@
   "5VAT_rUbLYE","AZ_eiVs91_I","k48e9GzcQVM","b1gE2G7yFzo","J3i3F2e4IYs","YrgQDETGO00","V_f8Q2_Q_J0","twQCZWBbcRE","xXp4iNBFL88","aOgJXd93HLg",
   "1gFSDD12RP8","9Qs5-_DOkVE","twQCZWBbcRE","NteGUDYZ1nE","5VAT_rUbLYE","YrgQDETGO00","cESaIUWoCJQ","5R6bBNnZgDE","xXp4iNBFL88"
   ];
+
+  let tileNumbersVisible = true; // Track visibility state
 
   const visibleTiles = {};
 
@@ -189,20 +193,23 @@
   tile.style.left = `${col * TILE_WIDTH}px`;
 
   const img = document.createElement("img");
-  img.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+  img.src = `http://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`; // Corrected YouTube thumbnail URL
   img.alt = `Tile ${row}, ${col}`;
   tile.appendChild(img);
 
   const tileNumber = document.createElement("div");
   tileNumber.className = "tile-number";
   tileNumber.textContent = (row * GRID_COLS + col) + 1;
+  if (!tileNumbersVisible) {
+  tileNumber.classList.add('hidden');
+  }
   tile.appendChild(tileNumber);
 
   tile.addEventListener("click", () => {
   tile.innerHTML = `
   <div class="iframe-container">
   <iframe
-  src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1"
+  src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
   allowfullscreen
   ></iframe>
@@ -227,24 +234,41 @@
 
   // Play Visible Videos functionality
   playAllButton.addEventListener('click', () => {
-  // Get the currently visible tiles based on scroll position
-  const scrollLeft = viewport.scrollLeft;
-  const scrollTop = viewport.scrollTop;
-  const viewportWidth = viewport.clientWidth;
-  const viewportHeight = viewport.clientHeight;
+  const tilesToPlay = [];
+  for (let key in visibleTiles) {
+  // Ensure the tile is actually in the current viewport and not already playing
+  const tileElement = visibleTiles[key];
+  const rect = tileElement.getBoundingClientRect();
+  const isCompletelyVisible = (
+  rect.top >= 0 &&
+  rect.left >= 0 &&
+  rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+  rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
 
-  const startCol = Math.floor(scrollLeft / TILE_WIDTH);
-  const endCol = Math.min(GRID_COLS, Math.ceil((scrollLeft + viewportWidth) / TILE_WIDTH));
-  const startRow = Math.floor(scrollTop / TILE_HEIGHT);
-  const endRow = Math.min(GRID_ROWS, Math.ceil((scrollTop + viewportHeight) / TILE_HEIGHT));
-
-  // Iterate over visible rows and columns and trigger click
-  for (let row = startRow; row < endRow; row++) {
-  for (let col = startCol; col < endCol; col++) {
-  const key = `${row}_${col}`;
-  if (visibleTiles[key] && !visibleTiles[key].querySelector('iframe')) {
-  visibleTiles[key].click();
+  if (isCompletelyVisible && !tileElement.querySelector('iframe')) {
+  tilesToPlay.push(tileElement);
   }
+  }
+
+  let delay = 0;
+  const staggerDelay = 200; // 200ms delay between each video start
+
+  tilesToPlay.forEach(tile => {
+  setTimeout(() => {
+  tile.click(); // Simulate a click to play the video
+  }, delay);
+  delay += staggerDelay;
+  });
+  });
+
+  // Toggle Numbers Functionality
+  toggleNumbersButton.addEventListener('click', () => {
+  tileNumbersVisible = !tileNumbersVisible;
+  for (let key in visibleTiles) {
+  const tileNumber = visibleTiles[key].querySelector('.tile-number');
+  if (tileNumber) {
+  tileNumber.classList.toggle('hidden', !tileNumbersVisible);
   }
   }
   });
