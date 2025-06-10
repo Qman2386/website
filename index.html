@@ -7,156 +7,163 @@
  <style>
  /* Banner Styles */
  #banner {
- position: fixed;
- top: 0;
- left: 0;
- width: 100%;
- background-color: #f0c14b;
- color: #000;
- text-align: center;
- padding: 10px 0;
- z-index: 1000;
- font-size: 16px;
- display: flex;
- justify-content: center;
- align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #f0c14b;
+  color: #000;
+  text-align: center;
+  padding: 10px 0;
+  z-index: 1000;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
  }
 
  #banner a {
- color: #000;
- text-decoration: none;
- font-weight: bold;
- margin-right: 20px; /* Spacing between link and button */
+  color: #000;
+  text-decoration: none;
+  font-weight: bold;
+  margin-right: 20px;
  }
 
  #banner a:hover {
- text-decoration: underline;
+  text-decoration: underline;
  }
 
  /* Button Styles */
  #playAllButton {
- background-color: #4CAF50; /* Green */
- border: none;
- color: white;
- padding: 8px 16px;
- text-align: center;
- text-decoration: none;
- display: inline-block;
- font-size: 16px;
- cursor: pointer;
- border-radius: 5px;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-left: 10px; /* Space between buttons */
+ }
+
+ /* Tile Number Styles */
+ .tile-number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  text-align: center;
+  line-height: 20px;
+  font-size: 12px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+ }
+
+ .tile:hover .tile-number {
+  opacity: 1;
+ }
+
+ /* Hidden Tile Number Style */
+ .tile-number.hidden {
+  display: none;
  }
 
  /* Existing Styles - unchanged */
  html, body {
- margin: 0;
- height: 100%;
- overflow: hidden;
- background: #000;
- font-family: sans-serif;
- color: white;
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: sans-serif;
+  color: white;
  }
 
  #viewport {
- width: 100vw;
- height: 100vh;
- overflow: auto;
- position: relative;
- top: 40px;
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+  position: relative;
+  top: 40px;
  }
 
  #grid {
- position: relative;
- width: 160000px;
- height: 90000px;
+  position: relative;
+  width: 160000px;
+  height: 90000px;
  }
 
  .tile {
- position: absolute;
- width: 160px;
- height: 90px;
- background: #222;
- overflow: hidden;
- cursor: pointer;
+  position: absolute;
+  width: 160px;
+  height: 90px;
+  background: #222;
+  overflow: hidden;
+  cursor: pointer;
  }
 
  .tile img {
- width: 100%;
- height: 100%;
- object-fit: cover;
- object-position: center;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
  }
 
  .iframe-container {
- width: 100%;
- height: 100%;
+  width: 100%;
+  height: 100%;
  }
 
  .iframe-container iframe {
- width: 100%;
- height: 100%;
- border: none;
- }
-
- .tile-number {
- position: absolute;
- top: 0;
- left: 0;
- width: 100%;
- height: 20px;
- background: rgba(0, 0, 0, 0.7);
- color: white;
- text-align: center;
- line-height: 20px;
- font-size: 12px;
- opacity: 1;
- transition: opacity 0.3s ease;
- }
-
- .tile:hover .tile-number {
- opacity: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
  }
  </style>
 </head>
 
 <body>
  <div id="banner">
- <a href="https://www.indiegogo.com/projects/ssrt-world-s-first-smart-solar-roof-tile" target="_blank">
- Support the Million Tile Video Wall on Indiegogo!
- </a>
- <button id="playAllButton">Play All Videos</button>
+  <a href="https://www.indiegogo.com/projects/ssrt-world-s-first-smart-solar-roof-tile" target="_blank">
+  Support the Million Tile Video Wall on Indiegogo!
+  </a>
+  <button id="playAllButton">Play Visible Videos</button>
  </div>
 
  <div id="viewport">
- <div id="grid"></div>
+  <div id="grid"></div>
  </div>
 
  <script>
- const viewport = document.getElementById('viewport');
- const grid = document.getElementById('grid');
- const playAllButton = document.getElementById('playAllButton');
+  const viewport = document.getElementById('viewport');
+  const grid = document.getElementById('grid');
+  const playAllButton = document.getElementById('playAllButton');
 
- const TILE_WIDTH = 160;
- const TILE_HEIGHT = 90;
- const GRID_COLS = 10;
- const GRID_ROWS = 10;
+  const TILE_WIDTH = 160;
+  const TILE_HEIGHT = 90;
+  const GRID_COLS = 10;
+  const GRID_ROWS = 10;
 
- const sampleVideos = [
- "twQCZWBbcRE","AHZbB-bfh-k","hr8ZQ-Qybg8","AZ_eiVs91_I","YrgQDETGO00","aOgJXd93HLg","1gFSDD12RP8","xXp4iNBFL88","b1gE2G7yFzo","cESaIUWoCJQ",
- "5R6bBNnZgDE","AZ_eiVs91_I","k48e9GzcQVM","5VAT_rUbLYE","Au3H5cYTUI8","V_f8Q2_Q_J0","AHZbB-bfh-k","9Qs5-_DOkVE","COvy3uC7t_E","9J4eS6I5_s0",
- "Au3H5cYTUI8","J3i3F2e4IYs","V_f8Q2_Q_J0","NteGUDYZ1nE","Au3H5cYTUI8","COvy3uC7t_E","J3i3F2e4IYs","YrgQDETGO00","8xgnm6SynH4","9J4eS6I5_s0",
- "V_f8Q2_Q_J0","b1gE2G7yFzo","J3i3F2e4IYs","k48e9GzcQVM","COvy3uC7t_E","YrgQDETGO00","AZ_eiVs91_I","cESaIUWoCJQ","k48e9GzcQVM","V_f8Q2_Q_J0",
- "twQCZWBbcRE","5R6bBNnZgDE","8xgnm6SynH4","NteGUDYZ1nE","9J4eS6I5_s0","aOgJXd93HLg","COvy3uC7t_E","hr8ZQ-Qybg8","5R6bBNnZgDE","9J4eS6I5_s0",
- "J3i3F2e4IYs","5VAT_rUbLYE","k48e9G9zcQVM","V_f8Q2_Q_J0","NteGUDYZ1nE","5R6bBNnZgDE","hr8ZQ-Qybg8","xXp4iNBFL88","b1gE2G7yFzo","AZ_eiVs91_I",
- "twQCZWBbcRE","9Qs5-_DOkVE","9J4eS6I5_s0","9Qs5-_DOkVE","cESaIUWoCJQ","YrgQDETGO00","V_f8Q2_Q_J0","AHZbB-bfh-k","AHZbB-bfh-k","AHZbB-bfh-k",
- "1gFSDD12RP8","8xgnm6SynH4","NteGUDYZ1nE","Au3H5cYTUI8","hr8ZQ-Qybg8","b1gE2G7yFzo","Au3H5cYTUI8","1gFSDD12RP8","COvy3uC7t_E","hr8ZQ-Qybg8",
- "5VAT_rUbLYE","AZ_eiVs91_I","k48e9GzcQVM","b1gE2G7yFzo","J3i3F2e4IYs","YrgQDETGO00","V_f8Q2_Q_J0","twQCZWBbcRE","xXp4iNBFL88","aOgJXd93HLg",
- "1gFSDD12RP8","9Qs5-_DOkVE","twQCZWBbcRE","NteGUDYZ1nE","5VAT_rUbLYE","YrgQDETGO00","cESaIUWoCJQ","5R6bBNnZgDE","xXp4iNBFL88"
- ];
+  const sampleVideos = [
+  "twQCZWBbcRE","AHZbB-bfh-k","hr8ZQ-Qybg8","AZ_eiVs91_I","YrgQDETGO00","aOgJXd93HLg","1gFSDD12RP8","xXp4iNBFL88","b1gE2G7yFzo","cESaIUWoCJQ",
+  "5R6bBNnZgDE","AZ_eiVs91_I","k48e9GzcQVM","5VAT_rUbLYE","Au3H5cYTUI8","V_f8Q2_Q_J0","AHZbB-bfh-k","9Qs5-_DOkVE","COvy3uC7t_E","9J4eS6I5_s0",
+  "Au3H5cYTUI8","J3i3F2e4IYs","V_f8Q2_Q_J0","NteGUDYZ1nE","Au3H5cYTUI8","COvy3uC7t_E","J3i3F2e4IYs","YrgQDETGO00","8xgnm6SynH4","9J4eS6I5_s0",
+  "V_f8Q2_Q_J0","b1gE2G7yFzo","J3i3F2e4IYs","k48e9GzcQVM","COvy3uC7t_E","YrgQDETGO00","AZ_eiVs91_I","cESaIUWoCJQ","k48e9GzcQVM","V_f8Q2_Q_J0",
+  "twQCZWBbcRE","5R6bBNnZgDE","8xgnm6SynH4","NteGUDYZ1nE","9J4eS6I5_s0","aOgJXd93HLg","COvy3uC7t_E","hr8ZQ-Qybg8","5R6bBNnZgDE","9J4eS6I5_s0",
+  "J3i3F2e4IYs","5VAT_rUbLYE","k48e9G9zcQVM","V_f8Q2_Q_J0","NteGUDYZ1nE","5R6bBNnZgDE","hr8ZQ-Qybg8","xXp4iNBFL88","b1gE2G7yFzo","AZ_eiVs91_I",
+  "twQCZWBbcRE","9Qs5-_DOkVE","9J4eS6I5_s0","9Qs5-_DOkVE","cESaIUWoCJQ","YrgQDETGO00","V_f8Q2_Q_J0","AHZbB-bfh-k","AHZbB-bfh-k","AHZbB-bfh-k",
+  "1gFSDD12RP8","8xgnm6SynH4","NteGUDYZ1nE","Au3H5cYTUI8","hr8ZQ-Qybg8","b1gE2G7yFzo","Au3H5cYTUI8","1gFSDD12RP8","COvy3uC7t_E","hr8ZQ-Qybg8",
+  "5VAT_rUbLYE","AZ_eiVs91_I","k48e9GzcQVM","b1gE2G7yFzo","J3i3F2e4IYs","YrgQDETGO00","V_f8Q2_Q_J0","twQCZWBbcRE","xXp4iNBFL88","aOgJXd93HLg",
+  "1gFSDD12RP8","9Qs5-_DOkVE","twQCZWBbcRE","NteGUDYZ1nE","5VAT_rUbLYE","YrgQDETGO00","cESaIUWoCJQ","5R6bBNnZgDE","xXp4iNBFL88"
+  ];
 
- const visibleTiles = {};
+  const visibleTiles = {};
 
- function renderTiles() {
+  function renderTiles() {
   const scrollLeft = viewport.scrollLeft;
   const scrollTop = viewport.scrollTop;
   const viewportWidth = viewport.clientWidth;
@@ -182,7 +189,6 @@
   tile.style.left = `${col * TILE_WIDTH}px`;
 
   const img = document.createElement("img");
-  // Corrected YouTube thumbnail URL
   img.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
   img.alt = `Tile ${row}, ${col}`;
   tile.appendChild(img);
@@ -215,23 +221,37 @@
   delete visibleTiles[key];
   }
   }
- }
+  }
 
- renderTiles();
+  renderTiles();
 
- // Play All Videos functionality
- playAllButton.addEventListener('click', () => {
-  for (let key in visibleTiles) {
-  // Check if the tile already contains an iframe. If so, don't re-render it.
-  if (!visibleTiles[key].querySelector('iframe')) {
-  visibleTiles[key].click(); // Simulate a click on each tile
+  // Play Visible Videos functionality
+  playAllButton.addEventListener('click', () => {
+  // Get the currently visible tiles based on scroll position
+  const scrollLeft = viewport.scrollLeft;
+  const scrollTop = viewport.scrollTop;
+  const viewportWidth = viewport.clientWidth;
+  const viewportHeight = viewport.clientHeight;
+
+  const startCol = Math.floor(scrollLeft / TILE_WIDTH);
+  const endCol = Math.min(GRID_COLS, Math.ceil((scrollLeft + viewportWidth) / TILE_WIDTH));
+  const startRow = Math.floor(scrollTop / TILE_HEIGHT);
+  const endRow = Math.min(GRID_ROWS, Math.ceil((scrollTop + viewportHeight) / TILE_HEIGHT));
+
+  // Iterate over visible rows and columns and trigger click
+  for (let row = startRow; row < endRow; row++) {
+  for (let col = startCol; col < endCol; col++) {
+  const key = `${row}_${col}`;
+  if (visibleTiles[key] && !visibleTiles[key].querySelector('iframe')) {
+  visibleTiles[key].click();
   }
   }
- });
+  }
+  });
 
- viewport.addEventListener("scroll", () => {
+  viewport.addEventListener("scroll", () => {
   requestAnimationFrame(renderTiles);
- });
+  });
  </script>
 </body>
 </html>
