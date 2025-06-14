@@ -236,6 +236,7 @@
     }
 
     renderTiles();
+    setInterval(renderTiles, 3000);
 
     playAllButton.addEventListener('click', () => {
       const tilesToPlay = [];
