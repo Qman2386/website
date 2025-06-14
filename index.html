@@ -32,17 +32,7 @@
       text-decoration: underline;
     }
 
-    #playAllButton, #toggleNumbersButton {
-      background-color: #4CAF50;
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      text-align: center;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-left: 10px;
-    }
+    /* Removed #playAllButton and #toggleNumbersButton styles */
 
     .tile-number {
       position: absolute;
@@ -70,15 +60,14 @@
     html, body {
       margin: 0;
       height: 100%;
-/*       overflow: hidden; */
       background: #000;
       font-family: sans-serif;
       color: white;
     }
 
     #viewport {
-      width: 100vw; /*update*/
-      height: 100vh; /*update*/
+      width: 100vw;
+      height: 100vh;
       overflow: auto;
       position: relative;
       top: 40px;
@@ -124,8 +113,7 @@
     <a href="https://www.indiegogo.com/projects/ssrt-world-s-first-smart-solar-roof-tile" target="_blank">
       Support the Million Tile Video Wall Here!
     </a>
-    <button id="playAllButton">Play</button>
-<!--     <button id="toggleNumbersButton">Toggle #</button> -->
+    <!-- Removed playAllButton -->
   </div>
 
   <div id="viewport">
@@ -135,39 +123,20 @@
   <script>
     const viewport = document.getElementById('viewport');
     const grid = document.getElementById('grid');
-    const playAllButton = document.getElementById('playAllButton');
-    const toggleNumbersButton = document.getElementById('toggleNumbersButton');
 
     const TILE_WIDTH = 160;
     const TILE_HEIGHT = 90;
-    const GRID_COLS = 10; /*update*/
-    const GRID_ROWS = 10; /*update*/
-
-    // const sampleVideos = [
-    //   "dqKpx51vKLc", "WJ-kuy2Bogw", "jfreFPe99GU", "8wtLZzLhIAs", "tFU2nhcu2Fs","EUadj4yDug8", "Xs4Z_4nQV2Y", "C6qOQ9D7puw", "", "",
-    //   "", "", "", "", "", "", "", "", "", "",
-    //   "", "", "", "", "", "", "", "", "", "",
-    //   "", "", "", "", "", "", "", "", "", "",
-    //   "", "", "", "", "", "", "", "", "", "",
-    //   "", "", "", "", "", "", "", "", "", "",
-    //   "", "", "", "", "", "", "", "", "", "",
-    //   "", "", "", "", "", "", "", "", "", "",
-    //   "", "", "", "", "", "", "", "", "", ""
-    // ];
+    const GRID_COLS = 10;
+    const GRID_ROWS = 10;
 
     const initialVideos = [
       "dqKpx51vKLc", "WJ-kuy2Bogw", "jfreFPe99GU", "8wtLZzLhIAs", "tFU2nhcu2Fs", "EUadj4yDug8", "Xs4Z_4nQV2Y", "C6qOQ9D7puw","P_iiOMd3fOY","b63IPrrdPOU"
     ];
     
-    // How many to append (e.g., total length target is 10000)
-    const targetLength = 100; /*update*/
-    // Number of "dqKpx51vKLc" to append:
+    const targetLength = 100;
     const toAppendCount = targetLength - initialVideos.length;
-    // Create an array filled with "dqKpx51vKLc"
     const appendedVideos = new Array(toAppendCount).fill("");
-    // Combine both arrays
     const sampleVideos = initialVideos.concat(appendedVideos);
-
 
     let tileNumbersVisible = true;
     const visibleTiles = {};
@@ -210,6 +179,7 @@
             }
             tile.appendChild(tileNumber);
 
+            // Keep click to load video functionality (optional)
             tile.addEventListener("click", () => {
               tile.innerHTML = `
                 <div class="iframe-container">
@@ -238,61 +208,24 @@
     renderTiles();
     setInterval(renderTiles, 1000);
 
-    playAllButton.addEventListener('click', () => {
-      const tilesToPlay = [];
-      for (let key in visibleTiles) {
-        const tileElement = visibleTiles[key];
-        const rect = tileElement.getBoundingClientRect();
-        const isPartiallyVisible = (
-          rect.bottom > 0 &&
-          rect.right > 0 &&
-          rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
-          rect.left < (window.innerWidth || document.documentElement.clientWidth)
-        );
+    // Removed playAllButton event listener
+    // Removed toggleNumbersButton event listener
 
-        if (isPartiallyVisible && !tileElement.querySelector('iframe')) {
-          tilesToPlay.push(tileElement);
-        }
-      }
-
-      let delay = 0;
-      const staggerDelay = 200;
-
-      tilesToPlay.forEach(tile => {
-        setTimeout(() => {
-          tile.click();
-        }, delay);
-        delay += staggerDelay;
-      });
+    viewport.addEventListener("scroll", () => {
+      renderTiles();
     });
-
-    toggleNumbersButton.addEventListener('click', () => {
-      tileNumbersVisible = !tileNumbersVisible;
-      for (let key in visibleTiles) {
-        const tileNumber = visibleTiles[key].querySelector('.tile-number');
-        if (tileNumber) {
-          tileNumber.classList.toggle('hidden', !tileNumbersVisible);
-        }
-      }
+    
+    viewport.addEventListener("touchmove", () => {
+      renderTiles();
     });
-
-  viewport.addEventListener("scroll", () => {
-    renderTiles();
-  });
-  
-  viewport.addEventListener("touchmove", () => {
-    renderTiles();
-  });
-  
-  viewport.addEventListener("wheel", () => {
-    renderTiles();
-  });
-  
-  window.addEventListener("resize", () => {
-    renderTiles();
-  });
-
-
+    
+    viewport.addEventListener("wheel", () => {
+      renderTiles();
+    });
+    
+    window.addEventListener("resize", () => {
+      renderTiles();
+    });
   </script>
 </body>
 </html>
