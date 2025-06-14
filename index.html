@@ -32,8 +32,6 @@
       text-decoration: underline;
     }
 
-    /* Removed #playAllButton and #toggleNumbersButton styles */
-
     .tile-number {
       position: absolute;
       top: 0;
@@ -113,7 +111,6 @@
     <a href="https://www.indiegogo.com/projects/ssrt-world-s-first-smart-solar-roof-tile" target="_blank">
       Support the Million Tile Video Wall Here!
     </a>
-    <!-- Removed playAllButton -->
   </div>
 
   <div id="viewport">
@@ -123,6 +120,7 @@
   <script>
     const viewport = document.getElementById('viewport');
     const grid = document.getElementById('grid');
+    const banner = document.getElementById('banner');
 
     const TILE_WIDTH = 160;
     const TILE_HEIGHT = 90;
@@ -130,9 +128,25 @@
     const GRID_ROWS = 10;
 
     const initialVideos = [
-      "dqKpx51vKLc", "WJ-kuy2Bogw", "jfreFPe99GU", "8wtLZzLhIAs", "tFU2nhcu2Fs", "EUadj4yDug8", "Xs4Z_4nQV2Y", "C6qOQ9D7puw","P_iiOMd3fOY","b63IPrrdPOU"
+      "dqKpx51vKLc", "WJ-kuy2Bogw", "jfreFPe99GU", "8wtLZzLhIAs",
+      "tFU2nhcu2Fs", "EUadj4yDug8", "Xs4Z_4nQV2Y", "C6qOQ9D7puw",
+      "P_iiOMd3fOY", "b63IPrrdPOU"
     ];
-    
+
+    // Add a messages array, one per initial video
+    const messages = [
+      "This is my favorite song!",
+      "Great track for workouts",
+      "Classic tune from the 80s",
+      "Chill vibes",
+      "Energetic party mix",
+      "Soothing acoustic",
+      "Upbeat pop hit",
+      "Inspirational soundtrack",
+      "Relaxing jazz piece",
+      "Motivational anthem"
+    ];
+
     const targetLength = 100;
     const toAppendCount = targetLength - initialVideos.length;
     const appendedVideos = new Array(toAppendCount).fill("");
@@ -158,8 +172,10 @@
         for (let col = startCol; col < endCol; col++) {
           const key = `${row}_${col}`;
           newVisible[key] = true;
+
           if (!visibleTiles[key]) {
-            const youtubeId = sampleVideos[(row * GRID_COLS + col) % sampleVideos.length];
+            const index = (row * GRID_COLS + col);
+            const youtubeId = sampleVideos[index % sampleVideos.length];
 
             const tile = document.createElement("div");
             tile.className = "tile";
@@ -173,13 +189,12 @@
 
             const tileNumber = document.createElement("div");
             tileNumber.className = "tile-number";
-            tileNumber.textContent = (row * GRID_COLS + col) + 1;
+            tileNumber.textContent = index + 1;
             if (!tileNumbersVisible) {
               tileNumber.classList.add('hidden');
             }
             tile.appendChild(tileNumber);
 
-            // Keep click to load video functionality (optional)
             tile.addEventListener("click", () => {
               tile.innerHTML = `
                 <div class="iframe-container">
@@ -189,6 +204,9 @@
                     allowfullscreen
                   ></iframe>
                 </div>`;
+
+              const message = messages[index % messages.length];
+              banner.textContent = `Now playing video #${index + 1}: ${message}`;
             });
 
             grid.appendChild(tile);
@@ -208,24 +226,10 @@
     renderTiles();
     setInterval(renderTiles, 1000);
 
-    // Removed playAllButton event listener
-    // Removed toggleNumbersButton event listener
-
-    viewport.addEventListener("scroll", () => {
-      renderTiles();
-    });
-    
-    viewport.addEventListener("touchmove", () => {
-      renderTiles();
-    });
-    
-    viewport.addEventListener("wheel", () => {
-      renderTiles();
-    });
-    
-    window.addEventListener("resize", () => {
-      renderTiles();
-    });
+    viewport.addEventListener("scroll", renderTiles);
+    viewport.addEventListener("touchmove", renderTiles);
+    viewport.addEventListener("wheel", renderTiles);
+    window.addEventListener("resize", renderTiles);
   </script>
 </body>
 </html>
