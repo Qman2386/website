@@ -117,124 +117,124 @@
     <div id="grid"></div>
   </div>
 
- <script>
-  const viewport = document.getElementById('viewport');
-  const grid = document.getElementById('grid');
-  const banner = document.getElementById('banner');
+  <script>
+    const viewport = document.getElementById('viewport');
+    const grid = document.getElementById('grid');
+    const banner = document.getElementById('banner');
+    banner.innerHTML += ` &nbsp;(${10} / 1,000,000 videos)`; // initialVideos.length is 10
 
-  const TILE_WIDTH = 160;
-  const TILE_HEIGHT = 90;
-  const GRID_COLS = 1000;
-  const GRID_ROWS = 1000;
+    const TILE_WIDTH = 160;
+    const TILE_HEIGHT = 90;
+    const GRID_COLS = 1000;
+    const GRID_ROWS = 1000;
 
-  const initialVideos = [
-    "dqKpx51vKLc", "WJ-kuy2Bogw", "jfreFPe99GU", "8wtLZzLhIAs",
-    "tFU2nhcu2Fs", "EUadj4yDug8", "Xs4Z_4nQV2Y", "C6qOQ9D7puw",
-    "P_iiOMd3fOY", "b63IPrrdPOU"
-  ];
+    const initialVideos = [
+      "dqKpx51vKLc", "WJ-kuy2Bogw", "jfreFPe99GU", "8wtLZzLhIAs",
+      "tFU2nhcu2Fs", "EUadj4yDug8", "Xs4Z_4nQV2Y", "C6qOQ9D7puw",
+      "P_iiOMd3fOY", "b63IPrrdPOU"
+    ];
 
-  const messages = [
-    "This is my favorite song!",
-    "Great track for workouts",
-    "Classic tune from the 80s",
-    "Chill vibes",
-    "Energetic party mix",
-    "Soothing acoustic",
-    "Upbeat pop hit",
-    "Inspirational soundtrack",
-    "Relaxing jazz piece",
-    "Motivational anthem"
-  ];
+    const messages = [
+      "This is my favorite song!",
+      "Great track for workouts",
+      "Classic tune from the 80s",
+      "Chill vibes",
+      "Energetic party mix",
+      "Soothing acoustic",
+      "Upbeat pop hit",
+      "Inspirational soundtrack",
+      "Relaxing jazz piece",
+      "Motivational anthem"
+    ];
 
-  const targetLength = 1000000;
-  const toAppendCount = targetLength - initialVideos.length;
-  const appendedVideos = new Array(toAppendCount).fill("");
-  const sampleVideos = initialVideos.concat(appendedVideos);
+    const targetLength = 1000000;
+    const toAppendCount = targetLength - initialVideos.length;
+    const appendedVideos = new Array(toAppendCount).fill("");
+    const sampleVideos = initialVideos.concat(appendedVideos);
 
-  let tileNumbersVisible = true;
-  const visibleTiles = {};
+    let tileNumbersVisible = true;
+    const visibleTiles = {};
 
-  function renderTiles() {
-    const scrollLeft = viewport.scrollLeft;
-    const scrollTop = viewport.scrollTop;
-    const viewportWidth = viewport.clientWidth;
-    const viewportHeight = viewport.clientHeight;
+    function renderTiles() {
+      const scrollLeft = viewport.scrollLeft;
+      const scrollTop = viewport.scrollTop;
+      const viewportWidth = viewport.clientWidth;
+      const viewportHeight = viewport.clientHeight;
 
-    const startCol = Math.floor(scrollLeft / TILE_WIDTH);
-    const endCol = Math.min(GRID_COLS, Math.ceil((scrollLeft + viewportWidth) / TILE_WIDTH));
-    const startRow = Math.floor(scrollTop / TILE_HEIGHT);
-    const endRow = Math.min(GRID_ROWS, Math.ceil((scrollTop + viewportHeight) / TILE_HEIGHT));
+      const startCol = Math.floor(scrollLeft / TILE_WIDTH);
+      const endCol = Math.min(GRID_COLS, Math.ceil((scrollLeft + viewportWidth) / TILE_WIDTH));
+      const startRow = Math.floor(scrollTop / TILE_HEIGHT);
+      const endRow = Math.min(GRID_ROWS, Math.ceil((scrollTop + viewportHeight) / TILE_HEIGHT));
 
-    const newVisible = {};
+      const newVisible = {};
 
-    for (let row = startRow; row < endRow; row++) {
-      for (let col = startCol; col < endCol; col++) {
-        const key = `${row}_${col}`;
-        newVisible[key] = true;
+      for (let row = startRow; row < endRow; row++) {
+        for (let col = startCol; col < endCol; col++) {
+          const key = `${row}_${col}`;
+          newVisible[key] = true;
 
-        if (!visibleTiles[key]) {
-          const index = (row * GRID_COLS + col);
-          const youtubeId = sampleVideos[index % sampleVideos.length];
+          if (!visibleTiles[key]) {
+            const index = (row * GRID_COLS + col);
+            const youtubeId = sampleVideos[index % sampleVideos.length];
 
-          const tile = document.createElement("div");
-          tile.className = "tile";
-          tile.style.top = `${row * TILE_HEIGHT}px`;
-          tile.style.left = `${col * TILE_WIDTH}px`;
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.style.top = `${row * TILE_HEIGHT}px`;
+            tile.style.left = `${col * TILE_WIDTH}px`;
 
-          const img = document.createElement("img");
-          img.src = `http://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
-          img.alt = `Tile ${row}, ${col}`;
-          tile.appendChild(img);
+            const img = document.createElement("img");
+            img.src = `http://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+            img.alt = `Tile ${row}, ${col}`;
+            tile.appendChild(img);
 
-          const tileNumber = document.createElement("div");
-          tileNumber.className = "tile-number";
-          tileNumber.textContent = index + 1;
-          if (!tileNumbersVisible) {
-            tileNumber.classList.add('hidden');
+            const tileNumber = document.createElement("div");
+            tileNumber.className = "tile-number";
+            tileNumber.textContent = index + 1;
+            if (!tileNumbersVisible) {
+              tileNumber.classList.add('hidden');
+            }
+            tile.appendChild(tileNumber);
+
+            tile.addEventListener("click", () => {
+              tile.innerHTML = `
+                <div class="iframe-container">
+                  <iframe
+                    src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                  ></iframe>
+                </div>`;
+
+              const message = messages[index % messages.length];
+              const videoUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
+              banner.innerHTML = `
+                Now playing video #${index + 1}: &nbsp;|&nbsp; ${message} 
+                &nbsp;|&nbsp;
+                <a href="${videoUrl}" target="_blank">Click Here to Watch on YouTube</a>
+              `;
+            });
+
+            grid.appendChild(tile);
+            visibleTiles[key] = tile;
           }
-          tile.appendChild(tileNumber);
+        }
+      }
 
-          tile.addEventListener("click", () => {
-            tile.innerHTML = `
-              <div class="iframe-container">
-                <iframe
-                  src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                ></iframe>
-              </div>`;
-
-            const message = messages[index % messages.length];
-            const videoUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
-            banner.innerHTML = `
-              Now playing video #${index + 1}: &nbsp;|&nbsp; ${message} 
-              &nbsp;|&nbsp;
-              <a href="${videoUrl}" target="_blank">Click Here to Watch on YouTube</a>
-            `;
-          });
-
-          grid.appendChild(tile);
-          visibleTiles[key] = tile;
+      for (let key in visibleTiles) {
+        if (!newVisible[key]) {
+          grid.removeChild(visibleTiles[key]);
+          delete visibleTiles[key];
         }
       }
     }
 
-    for (let key in visibleTiles) {
-      if (!newVisible[key]) {
-        grid.removeChild(visibleTiles[key]);
-        delete visibleTiles[key];
-      }
-    }
-  }
+    renderTiles();
 
-  renderTiles();
-  setInterval(renderTiles, 1000);
-
-  viewport.addEventListener("scroll", renderTiles);
-  viewport.addEventListener("touchmove", renderTiles);
-  viewport.addEventListener("wheel", renderTiles);
-  window.addEventListener("resize", renderTiles);
-</script>
-
+    viewport.addEventListener("scroll", renderTiles);
+    viewport.addEventListener("touchmove", renderTiles);
+    viewport.addEventListener("wheel", renderTiles);
+    window.addEventListener("resize", renderTiles);
+    
+  </script>
 </body>
 </html>
