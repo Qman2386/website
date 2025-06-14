@@ -275,9 +275,14 @@
       }
     });
 
-    viewport.addEventListener("scroll", () => {
+    // viewport.addEventListener("scroll", () => {
+    //   requestAnimationFrame(renderTiles);
+    // });
+    const resizeObserver = new ResizeObserver(() => {
       requestAnimationFrame(renderTiles);
     });
+    resizeObserver.observe(viewport);
+
   </script>
 </body>
 </html>
