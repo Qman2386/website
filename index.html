@@ -64,8 +64,8 @@
     }
 
     #viewport {
-      width: 100vw;
-      height: 100vh;
+      width: 1000vw;
+      height: 1000vh;
       overflow: auto;
       position: relative;
       top: 40px;
@@ -124,8 +124,8 @@
 
     const TILE_WIDTH = 160;
     const TILE_HEIGHT = 90;
-    const GRID_COLS = 10;
-    const GRID_ROWS = 10;
+    const GRID_COLS = 1000;
+    const GRID_ROWS = 1000;
 
     const initialVideos = [
       "dqKpx51vKLc", "WJ-kuy2Bogw", "jfreFPe99GU", "8wtLZzLhIAs",
@@ -147,7 +147,7 @@
       "Motivational anthem"
     ];
 
-    const targetLength = 100;
+    const targetLength = 1000000;
     const toAppendCount = targetLength - initialVideos.length;
     const appendedVideos = new Array(toAppendCount).fill("");
     const sampleVideos = initialVideos.concat(appendedVideos);
