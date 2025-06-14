@@ -275,23 +275,21 @@
       }
     });
 
-// Already present
-viewport.addEventListener("scroll", () => {
-  requestAnimationFrame(renderTiles);
-});
-
-// Add these:
-viewport.addEventListener("touchmove", () => {
-  requestAnimationFrame(renderTiles);
-});
-
-viewport.addEventListener("wheel", () => {
-  requestAnimationFrame(renderTiles);
-});
-
-window.addEventListener("resize", () => {
-  requestAnimationFrame(renderTiles);
-});
+  viewport.addEventListener("scroll", () => {
+    renderTiles();
+  });
+  
+  viewport.addEventListener("touchmove", () => {
+    renderTiles();
+  });
+  
+  viewport.addEventListener("wheel", () => {
+    renderTiles();
+  });
+  
+  window.addEventListener("resize", () => {
+    renderTiles();
+  });
 
 
   </script>
