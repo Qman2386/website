@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Million Message Wall. One million messages. One wall. One world.</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    #banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+      padding: 4px 0;
+      z-index: 1000;
+      font-size: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #banner a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      margin-right: 20px;
+    }
+    #banner a:hover {
+      text-decoration: underline;
+    }
+    .tile-number {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      text-align: center;
+      line-height: 20px;
+      font-size: 12px;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    .tile:hover .tile-number {
+      opacity: 1;
+    }
+    .tile-number.hidden {
+      display: none;
+    }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #000;
+      font-family: sans-serif;
+      color: white;
+    }
+    #viewport {
+      width: 100vw;
+      height: 1000vh;
+      overflow: auto;
+      position: relative;
+      top: 40px;
+    }
+    #grid {
+      position: relative;
+      width: 160000px;
+      height: 90000px;
+    }
+    .tile {
+      position: absolute;
+      width: 160px;
+      height: 90px;
+      background: #222;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    .iframe-container {
+      width: 100%;
+      height: 100%;
+    }
+    .iframe-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="banner">
+    <a href="https://www.indiegogo.com/projects/ssrt-world-s-first-smart-solar-roof-tile" target="_blank">
+      Click here to be a part of the Million Message Wall — or simply select a title to explore.
+    </a>
+  </div>
+
+  <div id="viewport">
+    <div id="grid"></div>
+  </div>
+
+  <script>
+    const TILE_WIDTH = 160;
+    const TILE_HEIGHT = 90;
+    const GRID_COLS = 1000;
+    const GRID_ROWS = 1000;
+    const CHUNK_SIZE = 10000;
+
+    const videoChunks = {};
+    const messageChunks = {};
+    const visibleTiles = {};
+    let tileNumbersVisible = true;
+
+    const viewport = document.getElementById('viewport');
+    const grid = document.getElementById('grid');
+    const banner = document.getElementById('banner');
+
+    banner.innerHTML += ` &nbsp; 0 / 1,000,000 `;
+
+    const baseURL = 'https://yourusername.github.io/million-message-wall/'; // Replace with your GitHub Pages base URL
+
+    async function fetchChunk(type, chunkNumber) {
+      const cache = type === 'videos' ? videoChunks : messageChunks;
+      if (cache[chunkNumber]) return cache[chunkNumber];
+
+      const url = `${baseURL}${type}-${chunkNumber.toString().padStart(5, '0')}.txt`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+        const text = await res.text();
+        const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+        cache[chunkNumber] = lines;
+        return lines;
+      } catch (err) {
+        console.warn(err.message);
+        cache[chunkNumber] = [];
+        return [];
+      }
+    }
+
+    async function getVideoAndMessage(index) {
+      const chunk = Math.floor(index / CHUNK_SIZE) + 1;
+      const offset = index % CHUNK_SIZE;
+      const [videos, messages] = await Promise.all([
+        fetchChunk('videos', chunk),
+        fetchChunk('messages', chunk)
+      ]);
+      return {
+        videoId: videos[offset] || '',
+        message: messages[offset] || '(No message)'
+      };
+    }
+
+    async function renderTiles() {
+      const scrollLeft = viewport.scrollLeft;
+      const scrollTop = viewport.scrollTop;
+      const viewportWidth = viewport.clientWidth;
+      const viewportHeight = viewport.clientHeight;
+
+      const startCol = Math.floor(scrollLeft / TILE_WIDTH);
+      const endCol = Math.min(GRID_COLS, Math.ceil((scrollLeft + viewportWidth) / TILE_WIDTH));
+      const startRow = Math.floor(scrollTop / TILE_HEIGHT);
+      const endRow = Math.min(GRID_ROWS, Math.ceil((scrollTop + viewportHeight) / TILE_HEIGHT));
+
+      const newVisible = {};
+
+      for (let row = startRow; row < endRow; row++) {
+        for (let col = startCol; col < endCol; col++) {
+          const key = `${row}_${col}`;
+          newVisible[key] = true;
+
+          if (!visibleTiles[key]) {
+            const index = row * GRID_COLS + col;
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.style.top = `${row * TILE_HEIGHT}px`;
+            tile.style.left = `${col * TILE_WIDTH}px`;
+
+            const placeholder = document.createElement("div");
+            placeholder.className = "tile-number";
+            placeholder.textContent = index + 1;
+            tile.appendChild(placeholder);
+
+            grid.appendChild(tile);
+            visibleTiles[key] = tile;
+
+            getVideoAndMessage(index).then(({ videoId, message }) => {
+              if (!visibleTiles[key]) return;
+              tile.innerHTML = '';
+              const img = document.createElement("img");
+              img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+              img.alt = `Tile ${row}, ${col}`;
+              tile.appendChild(img);
+
+              const tileNumber = document.createElement("div");
+              tileNumber.className = "tile-number";
+              tileNumber.textContent = index + 1;
+              if (!tileNumbersVisible) tileNumber.classList.add('hidden');
+              tile.appendChild(tileNumber);
+
+              tile.addEventListener("click", () => {
+                tile.innerHTML = `
+                  <div class="iframe-container">
+                    <iframe
+                      src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen
+                    ></iframe>
+                  </div>`;
+
+                const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                banner.innerHTML = `
+                  Message #${index + 1}: &nbsp;|&nbsp; ${message}
+                  &nbsp;&nbsp;
+                  <a href="${videoUrl}" target="_blank">Click Here to Watch on YouTube</a>
+                `;
+              });
+            });
+          }
+        }
+      }
+
+      for (let key in visibleTiles) {
+        if (!newVisible[key]) {
+          grid.removeChild(visibleTiles[key]);
+          delete visibleTiles[key];
+        }
+      }
+    }
+
+    window.addEventListener("load", renderTiles);
+    viewport.addEventListener("scroll", renderTiles);
+    viewport.addEventListener("touchmove", renderTiles);
+    viewport.addEventListener("wheel", renderTiles);
+    window.addEventListener("resize", renderTiles);
+  </script>
+</body>
+</html>
