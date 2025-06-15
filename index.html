@@ -13,20 +13,21 @@
       background-color: #000;
       color: #fff;
       text-align: center;
-      padding: 4px 8px;
+      padding: 8px 8px;
       z-index: 1000;
       font-size: 16px;
+
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;       /* stack text and slider vertically */
+      justify-content: center;
       align-items: center;
-      flex-wrap: wrap;
     }
 
     #banner a {
       color: #fff;
       text-decoration: none;
       font-weight: bold;
-      margin-right: 10px;
+      margin-bottom: 8px;           /* space below the text */
     }
 
     #banner a:hover {
@@ -37,13 +38,12 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      margin-top: 4px;
-      margin-right: 10px;
     }
 
     button {
       padding: 2px 8px;
       font-size: 14px;
+      cursor: pointer;
     }
 
     .tile-number {
@@ -82,7 +82,7 @@
       height: 1000vh;
       overflow: auto;
       position: relative;
-      top: 60px;
+      top: 80px; /* pushed down to avoid overlapping with taller banner */
     }
 
     #grid {
@@ -117,18 +117,50 @@
       height: 100%;
       border: none;
     }
+
+    /* Black slider thumb and track */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 200px;
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #000;
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      margin-top: -5px; /* center thumb vertically */
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: #000;
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
   </style>
 </head>
 
 <body>
   <div id="banner">
     <a href="https://www.indiegogo.com/projects/ssrt-world-s-first-smart-solar-roof-tile" target="_blank">
-      Click here to be a part of the Million Message Wall — or simply select a title to explore.
+      Click here to be a part of the Million Message Wall — or simply select a wall and tile to explore.
     </a>
     <div class="slider-controls">
       <span id="sliderValue">1</span>
       <button id="downBtn">−</button>
-      <input type="range" id="videoSlider" min="1" max="1000" value="1">
+      <input type="range" id="videoSlider" min="1" max="1000" value="1" />
       <button id="upBtn">+</button>
     </div>
   </div>
