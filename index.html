@@ -293,7 +293,7 @@
 
     function updateSliderDisplay() {
       const value = parseInt(slider.value, 10);
-      sliderValue.textContent = value;
+      sliderValue.textContent = `Wall ${value}`;
 
       const fileName = `videos-${value.toString().padStart(4, '0')}.txt`;
       console.log("Selected file:", fileName);
