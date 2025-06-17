@@ -40,13 +40,14 @@
       gap: 5px;
     }
 
-  button {
-      padding: 4px 12px;      /* More padding vertically and horizontally */
-      font-size: 16px;        /* Bigger font size */
+    button {
+      padding: 12px 20px;        /* More padding for a larger tap area */
+      font-size: 18px;           /* Larger, readable text */
       cursor: pointer;
-      border-radius: 0px;     /* Slightly rounded corners */
-      min-width: 30px;        /* Minimum width for buttons */
-      min-height: 30px;       /* Minimum height for buttons */
+      border-radius: 6px;        /* Slight rounding for comfort */
+      min-width: 48px;           /* Minimum recommended width */
+      min-height: 48px;          /* Minimum recommended height */
+      touch-action: manipulation; /* Improves responsiveness on mobile */
     }
 
     .tile-number {
