@@ -203,7 +203,11 @@
     const targetLength = 10000;
     const toAppendCount = targetLength - initialVideos.length;
     const appendedVideos = new Array(toAppendCount).fill("");
-    const sampleVideos = initialVideos.concat(appendedVideos);
+    // const sampleVideos = initialVideos.concat(appendedVideos);
+
+    let sampleVideos = [];
+    sampleVideos = initialVideos.concat(appendedVideos);
+
 
     let tileNumbersVisible = true;
     const visibleTiles = {};
@@ -298,10 +302,33 @@
       const value = parseInt(slider.value, 10);
       sliderValue.textContent = `Wall ${value}`;
 
-      const fileName = `videos-${value.toString().padStart(4, '0')}.txt`;
-      console.log("Selected file:", fileName);
+      const fileName = `${value.toString().padStart(4, '0')}`;  
+      const file = `https://qman2386.github.io/website/videos-${fileName}.txt`;
 
-      // TODO: fetch(`./videos/${fileName}`).then(...);
+      fetch(file)
+        .then(res => res.text())
+        .then(text => {
+          let initialVideos = [];
+          initialVideos = text.trim().split('\n').map(line => line.trim()).filter(Boolean);
+
+          const targetLength = 10000;
+          const toAppendCount = targetLength - initialVideos.length;
+          const appendedVideos = new Array(toAppendCount).fill("");
+          sampleVideos = initialVideos.concat(appendedVideos);
+          console.log(sampleVideos);
+
+          // Clear existing tiles
+          Object.keys(visibleTiles).forEach(key => {
+            grid.removeChild(visibleTiles[key]);
+            delete visibleTiles[key];
+          });
+
+          // Render new tiles
+          renderTiles();
+
+      });
+
+
     }
 
     slider.addEventListener('input', updateSliderDisplay);
