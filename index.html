@@ -239,11 +239,18 @@
 
               const message = messages[index] || "No message yet.";
               const videoUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
-              document.getElementById('banner').innerHTML = `
-                Wall ${slider.value} — Message #${index + 1}: &nbsp;|&nbsp; ${message} 
-                &nbsp; &nbsp;
-                <a href="${videoUrl}" target="_blank">Click Here to Watch on YouTube</a>
-              `;
+              // document.getElementById('banner').innerHTML = `
+              //   Wall ${slider.value} — Message #${index + 1}: &nbsp;|&nbsp; ${message} 
+              //   &nbsp; &nbsp;
+              //   <a href="${videoUrl}" target="_blank">Click Here to Watch on YouTube</a>
+              // `;
+              let bannerHtml = `Wall ${slider.value} — Message #${index + 1}: &nbsp;|&nbsp; ${message}`;
+              if (youtubeId) {
+                const videoUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
+                bannerHtml += ` &nbsp; &nbsp; <a href="${videoUrl}" target="_blank">Click Here to Watch on YouTube</a>`;
+              }
+              document.getElementById('banner').innerHTML = bannerHtml;
+
             });
 
             grid.appendChild(tile);
