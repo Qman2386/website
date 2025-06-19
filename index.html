@@ -321,8 +321,15 @@
           const toAppendCount = targetLength - initialVideos.length;
           const appendedVideos = new Array(toAppendCount).fill("");
           sampleVideos = initialVideos.concat(appendedVideos);
-
+          
+          // Clear existing tiles
+          Object.keys(visibleTiles).forEach(key => {
+            grid.removeChild(visibleTiles[key]);
+            delete visibleTiles[key];
           });
+          // Render new tiles
+          renderTiles();
+        });
 
        fetch(file1)
         .then(res => res.text())
@@ -342,11 +349,8 @@
           });
           // Render new tiles
           renderTiles();
-        });
-      
+        });      
       });
-
-
     }
 
     slider.addEventListener('input', updateSliderDisplay);
