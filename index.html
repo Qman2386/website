@@ -237,7 +237,7 @@
                   />
                 </div>`;
 
-              const message = messages[index % messages.length] || "No message available.";
+              const message = messages[index] || "No message yet.";
               const videoUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
               document.getElementById('banner').innerHTML = `
                 Wall ${slider.value} — Message #${index + 1}: &nbsp;|&nbsp; ${message} 
