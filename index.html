@@ -189,7 +189,7 @@
       "P_iiOMd3fOY", "b63IPrrdPOU"
     ];
 
-    const messages = [
+    const initialimessages = [
       "Blessed are those who expect nothing, for they shall never be disappointed.",
       "Baianá nananananana",
       "Gotta love that synth",
@@ -208,7 +208,9 @@
     // const sampleVideos = initialVideos.concat(appendedVideos);
 
     let sampleVideos = [];
+    let sampleMessages = [];
     sampleVideos = initialVideos.concat(appendedVideos);
+    sampleMessages = initialimessages.concat(appendedVideos);
 
 
     let tileNumbersVisible = true;
@@ -264,7 +266,7 @@
                   />
                 </div>`;
 
-              const message = messages[index % messages.length];
+              const message = sampleMessages[index % sampleMessages.length];
               const videoUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
               document.getElementById('banner').innerHTML = `
                 Message #${index + 1}: &nbsp;|&nbsp; ${message} 
@@ -306,6 +308,7 @@
 
       const fileName = `${value.toString().padStart(4, '0')}`;  
       const file = `https://qman2386.github.io/website/videos-${fileName}.txt`;
+      const file1 = `https://qman2386.github.io/website/messages-${fileName}.txt`;
 
       fetch(file)
         .then(res => res.text())
@@ -317,7 +320,23 @@
           const toAppendCount = targetLength - initialVideos.length;
           const appendedVideos = new Array(toAppendCount).fill("");
           sampleVideos = initialVideos.concat(appendedVideos);
-          console.log(sampleVideos);
+
+          // Clear existing tiles
+          Object.keys(visibleTiles).forEach(key => {
+            grid.removeChild(visibleTiles[key]);
+            delete visibleTiles[key];
+          });
+
+       fetch(file1)
+        .then(res => res.text())
+        .then(text => {
+          let initialMessages = [];
+          initialMessages = text.trim().split('\n').map(line => line.trim()).filter(Boolean);
+
+          const targetLength = 10000;
+          const toAppendCount = targetLength - initialVideos.length;
+          const appendedVideos = new Array(toAppendCount).fill("");
+          sampleMessages = initialVideos.concat(appendedVideos);
 
           // Clear existing tiles
           Object.keys(visibleTiles).forEach(key => {
