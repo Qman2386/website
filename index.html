@@ -322,10 +322,6 @@
           const appendedVideos = new Array(toAppendCount).fill("");
           sampleVideos = initialVideos.concat(appendedVideos);
 
-          // Clear existing tiles
-          Object.keys(visibleTiles).forEach(key => {
-            grid.removeChild(visibleTiles[key]);
-            delete visibleTiles[key];
           });
 
        fetch(file1)
@@ -344,10 +340,10 @@
             grid.removeChild(visibleTiles[key]);
             delete visibleTiles[key];
           });
-
           // Render new tiles
           renderTiles();
         });
+      
       });
 
 
